@@ -1,0 +1,185 @@
+#贺劲洁 18307130370#
+#/* $begin ncopy-ys */
+##################################################################
+# ncopy.ys - Copy a src block of len words to dst.
+# Return the number of positive words (>0) contained in src.
+#
+# Include your name and ID here.
+# 贺劲洁 18307130370#
+# Describe how and why you modified the baseline code.
+# 1.使用iaddq
+# 2.展开循环到10
+# 3.通过调整指令顺序，避免数据冒险
+# 4.通过三叉殊死想，在处理最后<=9的情况时，减少条件分支消耗
+##################################################################
+# Do not modify this portion
+# Function prologue.
+# %rdi = src, %rsi = dst, %rdx = len
+ncopy:
+
+##################################################################
+# You can modify this portion# You can modify this portion
+# Loop header
+	iaddq $-10,%rdx		# len-10 < 0?
+    jl last
+loop:	
+    mrmovq (%rdi), %r10	# val1
+    mrmovq 8(%rdi),%r11 # val2 
+    rmmovq %r10, (%rsi)# dst1
+    andq %r10, %r10
+    jle  n1
+    iaddq $1, %rax   
+n1: 
+    mrmovq 16(%rdi),%r10# val3
+    rmmovq %r11,8(%rsi)	# dst2
+    andq %r11, %r11
+    jle  n2
+    iaddq $1, %rax   
+n2:   
+    mrmovq 24(%rdi),%r11  #val4
+    rmmovq %r10, 16(%rsi) #dst3
+    andq %r10, %r10	
+    jle  n3
+    iaddq $1, %rax
+n3:
+    mrmovq 32(%rdi),%r10  #val5
+    rmmovq %r11, 24(%rsi) #dst4
+    andq %r11, %r11
+    jle  n4
+    iaddq $1, %rax
+n4:   
+    mrmovq 40(%rdi),%r11# val6
+	rmmovq %r10, 32(%rsi)# dst5
+    andq %r10, %r10	
+    jle  n5
+    iaddq $1, %rax
+n5:
+    mrmovq 48(%rdi),%r10  #val7
+    rmmovq %r11, 40(%rsi) #dst6
+    andq %r11, %r11
+    jle  n6
+    iaddq $1, %rax
+n6:
+    mrmovq 56(%rdi),%r11 #val8
+	rmmovq %r10, 48(%rsi)#dst7
+    andq %r10, %r10	
+    jle  n7
+    iaddq $1, %rax
+n7:
+    mrmovq 64(%rdi),%r10  #val9
+    rmmovq %r11, 56(%rsi) #dst8
+    andq %r11, %r11
+    jle  n8
+    iaddq $1, %rax
+n8:
+    mrmovq 72(%rdi),%r11  #val10
+    rmmovq %r10, 64(%rsi) #dst9
+    andq %r10, %r10
+    jle  n9
+    iaddq $1, %rax
+n9:
+    rmmovq %r11, 72(%rsi) #dst10
+    andq %r11, %r11
+    jle  test
+    iaddq $1, %rax
+test:
+    iaddq $80, %rdi
+    iaddq $80, %rsi
+    iaddq $-10,%rdx  #len>=10?
+    jge loop
+
+#less than 10
+last:
+    iaddq $7,%rdx    #len<=3(3-->0)
+    jl    left
+    jg    right
+    je    l3    #len=3 middle
+left:
+    iaddq $2,%rdx    # 1
+    je    l1
+    iaddq $-1,%rdx
+    je    l2    # 2
+    ret              # 0
+right:
+    iaddq $-3,%rdx   #<=6
+    jg    rr
+    je    l6    # 6
+    iaddq $1, %rdx   #rightleft
+    je    l5    # 5
+    jmp   l4    # 4
+rr:
+    iaddq $-2,%rdx  #9-2
+    jl    l7
+    je    l8
+l9:
+    mrmovq 64(%rdi),%r10  #9
+    andq %r10,%r10   #val<=0
+    rmmovq %r10, 64(%rsi)
+l8:  
+    mrmovq 56(%rdi),%r10 
+    jle l88
+    iaddq $1,%rax
+l88:
+    rmmovq %r10,56(%rsi)
+    andq %r10, %r10  # val <=0?
+l7:  
+    mrmovq 48(%rdi),%r10 
+    jle l77
+    iaddq $1,%rax
+l77:
+    rmmovq %r10,48(%rsi)
+    andq %r10, %r10  # val <=0?
+l6:  
+    mrmovq 40(%rdi),%r10 
+    jle l66
+    iaddq $1,%rax
+l66:
+    rmmovq %r10,40(%rsi)
+    andq %r10, %r10  # val <=0?
+l5:  
+    mrmovq 32(%rdi),%r10 
+    jle l55
+    iaddq $1,%rax
+l55:
+    rmmovq %r10,32(%rsi)
+    andq %r10, %r10  # val <=0?
+l4:  
+    mrmovq 24(%rdi),%r10 
+    jle l44
+    iaddq $1,%rax
+l44:
+    rmmovq %r10,24(%rsi)
+    andq %r10, %r10  # val <=0?
+l3:  
+    mrmovq 16(%rdi),%r10 
+    jle l33
+    iaddq $1,%rax
+l33:
+    rmmovq %r10,16(%rsi)
+    andq %r10, %r10  # val <=0?
+l2:  
+    mrmovq 8(%rdi),%r10 
+    jle l22
+    iaddq $1,%rax
+l22:
+    rmmovq %r10,8(%rsi)
+    andq %r10, %r10  # val <=0?
+l1:  
+    mrmovq (%rdi),%r10 
+    jle l11
+    iaddq $1,%rax
+l11:
+    rmmovq %r10,(%rsi)
+    andq %r10, %r10  # val <=0?
+    jle Done
+    iaddq $1,%rax
+
+##################################################################
+# Do not modify the following section of code
+# Function epilogue.
+Done:
+	ret
+##################################################################
+# Keep the following label at the end of your function
+End:
+#/* $end ncopy-ys */
